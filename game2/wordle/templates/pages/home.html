@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Word Guessing Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+      background: #f3f3f3;
+    }
+    h1 {
+      color: #4a148c;
+    }
+    #word-display {
+      font-size: 28px;
+      margin: 20px;
+      letter-spacing: 8px;
+    }
+    #keyboard {
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: repeat(13, 1fr);
+      gap: 5px;
+      max-width: 700px;
+    }
+    .key {
+      padding: 12px;
+      background: #e1bee7;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .key:disabled {
+      background: #b39ddb;
+      cursor: not-allowed;
+    }
+    #attempts, #game-message {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+    #hint-btn {
+      margin-top: 20px;
+      padding: 10px 15px;
+      background: #7b1fa2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #hint-btn:disabled {
+      background: #b39ddb;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>Word Guessing Game</h1>
+
+  <div id="word-display"></div>
+  <div id="keyboard"></div>
+
+  <p id="attempts">0/6</p>
+  <p id="game-message"></p>
+
+  <button id="hint-btn">Get Hint</button>
+
+  <script>
+    const words = ["python", "django", "react", "backend", "frontend"];
+    const maxAttempts = 6;
+
+    let gameState = {
+      targetWord: "",
+      guessedLetters: [],
+      attempts: 0,
+      maxAttempts: maxAttempts,
+      hintUsed: false,
+      gameOver: false
+    };
+
+    const wordDisplay = document.getElementById("word-display");
+    const keyboard = document.getElementById("keyboard");
+    const attemptsElement = document.getElementById("attempts");
+    const gameMessage = document.getElementById("game-message");
+    const hintBtn = document.getElementById("hint-btn");
+
+    // Initialize game
+    function initGame() {
+      gameState.targetWord = words[Math.floor(Math.random() * words.length)];
+      gameState.guessedLetters = [];
+      gameState.attempts = 0;
+      gameState.hintUsed = false;
+      gameState.gameOver = false;
+
+      renderWord();
+      renderKeyboard();
+      attemptsElement.textContent = `${gameState.attempts}/${gameState.maxAttempts}`;
+      gameMessage.textContent = "";
+      hintBtn.disabled = false;
+    }
+
+    // Render word display
+    function renderWord() {
+      wordDisplay.textContent = gameState.targetWord
+        .split("")
+        .map(letter => (gameState.guessedLetters.includes(letter) ? letter : "_"))
+        .join(" ");
+    }
+
+    // Render keyboard
+    function renderKeyboard() {
+      keyboard.innerHTML = "";
+      for (let i = 97; i <= 122; i++) {
+        const letter = String.fromCharCode(i);
+        const btn = document.createElement("button");
+        btn.textContent = letter.toUpperCase();
+        btn.classList.add("key");
+        btn.setAttribute("data-key", letter);
+        btn.disabled = gameState.guessedLetters.includes(letter) || gameState.gameOver;
+
+        btn.addEventListener("click", () => handleGuess(letter));
+        keyboard.appendChild(btn);
+      }
+    }
+
+    // Handle guess
+    function handleGuess(letter) {
+      if (gameState.gameOver) return;
+
+      if (!gameState.guessedLetters.includes(letter)) {
+        gameState.guessedLetters.push(letter);
+
+        if (!gameState.targetWord.includes(letter)) {
+          gameState.attempts++;
+        }
+      }
+
+      renderWord();
+      renderKeyboard();
+      attemptsElement.textContent = `${gameState.attempts}/${gameState.maxAttempts}`;
+
+      checkGameStatus();
+    }
+
+    // Check game status
+    function checkGameStatus() {
+      const wordGuessed = gameState.targetWord
+        .split("")
+        .every(letter => gameState.guessedLetters.includes(letter));
+
+      if (wordGuessed) {
+        gameMessage.textContent = "🎉 You won!";
+        gameState.gameOver = true;
+        disableKeyboard();
+      } else if (gameState.attempts >= gameState.maxAttempts) {
+        gameMessage.textContent = `💀 Game over! The word was ${gameState.targetWord}.`;
+        gameState.gameOver = true;
+        disableKeyboard();
+      }
+    }
+
+    // Disable keyboard
+    function disableKeyboard() {
+      const keys = document.querySelectorAll(".key");
+      keys.forEach(key => key.disabled = true);
+      hintBtn.disabled = true;
+    }
+
+    // Hint functionality
+    hintBtn.addEventListener("click", () => {
+      if (gameState.hintUsed || gameState.gameOver) return;
+
+      const remainingLetters = gameState.targetWord
+        .split("")
+        .filter(letter => !gameState.guessedLetters.includes(letter));
+
+      if (remainingLetters.length > 0) {
+        const hintLetter = remainingLetters[Math.floor(Math.random() * remainingLetters.length)];
+        gameState.guessedLetters.push(hintLetter);
+        gameState.hintUsed = true;
+
+        renderWord();
+        renderKeyboard();
+        gameMessage.textContent = `💡 Hint: The letter "${hintLetter}" is in the word!`;
+        hintBtn.disabled = true;
+      }
+    });
+
+    // Start game
+    initGame();
+  </script>
+</body>
+</html>
