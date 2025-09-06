@@ -1,4 +1,3 @@
-<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/63ee2824-bf8c-4c62-a650-0216a8df806b" />
 
 # Wordle Game 🎮
 
@@ -21,3 +20,4 @@ Players try to guess a hidden word within limited attempts, just like the popula
 - **Database**: SQLite (default for Django)
 
 ---
+<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/63ee2824-bf8c-4c62-a650-0216a8df806b" />
